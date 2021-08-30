@@ -6,10 +6,6 @@ data "http" "myip" {
   url = "http://ipv4.icanhazip.com"
 }
 
-# data.azurerm_resource_group.rg.id
-# data.azurerm_resource_group.rg.location
-# data.azurerm_resource_group.rg.name
-
 resource "azurerm_virtual_network" "vnet" {
   name                = "mos-vnet-171033"
   location            = data.azurerm_resource_group.rg.location
