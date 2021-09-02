@@ -241,3 +241,15 @@ resource "azurerm_windows_virtual_machine" "vm_dc" {
     version   = "latest"
   }
 }
+
+output "vm_client_ip_addr" {
+  value = "${azurerm_public_ip.vm_client_ip.ip_address}"
+}
+
+output "vm_mail_ip_addr" {
+  value = "${azurerm_public_ip.vm_mail_ip.ip_address}"
+}
+
+output "vm_dc_ip_addr" {
+  value = "${azurerm_public_ip.vm_dc_ip.ip_address}"
+}
