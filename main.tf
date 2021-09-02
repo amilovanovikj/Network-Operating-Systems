@@ -163,3 +163,49 @@ resource "azurerm_linux_virtual_machine" "vm_ftp_mail" {
     version   = "latest"
   }
 }
+
+resource "azurerm_network_interface" "vm_dc_nic" {
+  name                = "mos-vm-windows-dc-171033-nic"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+
+  ip_configuration {
+    name                          = "mos-vm-windows-dc-171033-ip-config"
+    subnet_id                     = azurerm_subnet.dc_subnet.id
+    public_ip_address_id          = azurerm_public_ip.vm_dc_ip.id
+    private_ip_address_allocation = "Dynamic"
+  }
+}
+
+resource "azurerm_public_ip" "vm_dc_ip" {
+  name                = "mos-vm-windows-dc-171033-ip"
+  resource_group_name = data.azurerm_resource_group.rg.name
+  location            = data.azurerm_resource_group.rg.location
+  allocation_method   = "Dynamic"
+}
+
+resource "azurerm_windows_virtual_machine" "vm_dc" {
+  name                = "mos-vm-windows-dc-171033"
+  computer_name       = "mos-dc-171033"
+  resource_group_name = data.azurerm_resource_group.rg.name
+  location            = data.azurerm_resource_group.rg.location
+  size                = "Standard_B2s"
+  admin_username      = var.windows_username
+  admin_password      = var.windows_password
+  network_interface_ids = [
+    azurerm_network_interface.vm_dc_nic.id,
+  ]
+
+  os_disk {
+    name                 = "mos-vm-windows-dc-171033-disk"
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2019-Datacenter"
+    version   = "latest"
+  }
+}

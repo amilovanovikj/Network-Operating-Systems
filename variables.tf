@@ -38,3 +38,8 @@ variable windows_username {
   sensitive   = true
   description = "The admin username for the Windows server"
 }
+variable windows_password {
+  type        = string
+  sensitive   = true
+  description = "The admin password for the Windows server"
+}
