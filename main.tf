@@ -116,6 +116,7 @@ resource "azurerm_public_ip" "vm_client_ip" {
 
 resource "azurerm_linux_virtual_machine" "vm_client" {
   name                = "mos-vm-ubuntu-client-171033"
+  computer_name       = "mos-clt-171033"
   resource_group_name = data.azurerm_resource_group.rg.name
   location            = data.azurerm_resource_group.rg.location
   admin_username      = var.linux_username
@@ -144,44 +145,45 @@ resource "azurerm_linux_virtual_machine" "vm_client" {
   }
 }
 
-resource "azurerm_network_interface" "vm_ftp_mail_nic" {
-  name                = "mos-vm-ubuntu-ftp-mail-171033-nic"
+resource "azurerm_network_interface" "vm_mail_nic" {
+  name                = "mos-vm-ubuntu-mail-171033-nic"
   location            = data.azurerm_resource_group.rg.location
   resource_group_name = data.azurerm_resource_group.rg.name
 
   ip_configuration {
-    name                          = "mos-vm-ubuntu-ftp-mail-171033-ip-config"
+    name                          = "mos-vm-ubuntu-mail-171033-ip-config"
     subnet_id                     = azurerm_subnet.vm_subnet.id
-    public_ip_address_id          = azurerm_public_ip.vm_ftp_mail_ip.id
+    public_ip_address_id          = azurerm_public_ip.vm_mail_ip.id
     private_ip_address_allocation = "Dynamic"
   }
 }
 
-resource "azurerm_public_ip" "vm_ftp_mail_ip" {
-  name                = "mos-vm-ubuntu-ftp-mail-171033-ip"
+resource "azurerm_public_ip" "vm_mail_ip" {
+  name                = "mos-vm-ubuntu-mail-171033-ip"
   resource_group_name = data.azurerm_resource_group.rg.name
   location            = data.azurerm_resource_group.rg.location
   allocation_method   = "Dynamic"
 }
 
-resource "azurerm_linux_virtual_machine" "vm_ftp_mail" {
-  name                = "mos-vm-ubuntu-ftp-mail-171033"
+resource "azurerm_linux_virtual_machine" "vm_mail" {
+  name                = "mos-vm-ubuntu-mail-171033"
+  computer_name       = "mos-mail-171033"
   resource_group_name = data.azurerm_resource_group.rg.name
   location            = data.azurerm_resource_group.rg.location
   admin_username      = var.linux_username
   size                = "Standard_B1s"
   
   network_interface_ids = [
-    azurerm_network_interface.vm_ftp_mail_nic.id,
+    azurerm_network_interface.vm_mail_nic.id,
   ]
 
   admin_ssh_key {
     username   = var.linux_username
-    public_key = var.ssh_key_ftp_mail
+    public_key = var.ssh_key_mail
   }
 
   os_disk {
-    name                 = "mos-vm-ubuntu-ftp-mail-171033-disk"
+    name                 = "mos-vm-ubuntu-mail-171033-disk"
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }

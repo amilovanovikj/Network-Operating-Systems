@@ -23,7 +23,7 @@ variable "ssh_key_client" {
   sensitive   = true
   description = "The SSH key for connecting to the Linux client machine"
 }
-variable "ssh_key_ftp_mail" {
+variable "ssh_key_mail" {
   type        = string
   sensitive   = true
   description = "The SSH key for connecting to the FTP/Mail Linux server"
