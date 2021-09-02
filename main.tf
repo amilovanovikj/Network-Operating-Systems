@@ -14,22 +14,8 @@ resource "azurerm_virtual_network" "vnet" {
   dns_servers         = ["172.16.32.4"]
 }
 
-resource "azurerm_subnet" "dc_subnet" {
-  name                 = "mos-vnet-dc-subnet-171033"
-  resource_group_name  = data.azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["172.16.32.0/27"]
-}
-
-resource "azurerm_subnet" "vm_subnet" {
-  name                 = "mos-vnet-vm-subnet-171033"
-  resource_group_name  = data.azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["172.16.32.32/27"]
-}
-
-resource "azurerm_network_security_group" "windows_nsg" {
-  name                = "mos-windows-nsg-171033"
+resource "azurerm_network_security_group" "dc_nsg" {
+  name                = "mos-dc-nsg-171033"
   location            = data.azurerm_resource_group.rg.location
   resource_group_name = data.azurerm_resource_group.rg.name
 
@@ -46,8 +32,28 @@ resource "azurerm_network_security_group" "windows_nsg" {
   }
 }
 
-resource "azurerm_network_security_group" "linux_nsg" {
-  name                = "mos-linux-nsg-171033"
+resource "azurerm_subnet" "dc_subnet" {
+  name                 = "mos-vnet-dc-subnet-171033"
+  resource_group_name  = data.azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["172.16.32.0/27"]
+
+  depends_on = [
+    azurerm_network_security_group.dc_nsg
+  ]
+}
+
+resource "azurerm_subnet_network_security_group_association" "dc_subnet_assoc" {
+  subnet_id                 = azurerm_subnet.dc_subnet.id
+  network_security_group_id = azurerm_network_security_group.dc_nsg.id
+
+  depends_on = [
+    azurerm_subnet.dc_subnet
+  ]
+}
+
+resource "azurerm_network_security_group" "vm_nsg" {
+  name                = "mos-vm-nsg-171033"
   location            = data.azurerm_resource_group.rg.location
   resource_group_name = data.azurerm_resource_group.rg.name
 
@@ -62,6 +68,30 @@ resource "azurerm_network_security_group" "linux_nsg" {
     source_address_prefix      = "${chomp(data.http.myip.body)}/32"
     destination_address_prefix = "*"
   }
+
+  depends_on = [
+    azurerm_subnet_network_security_group_association.dc_subnet_assoc
+  ]
+}
+
+resource "azurerm_subnet" "vm_subnet" {
+  name                 = "mos-vnet-vm-subnet-171033"
+  resource_group_name  = data.azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["172.16.32.32/27"]
+
+  depends_on = [
+    azurerm_network_security_group.vm_nsg
+  ]
+}
+
+resource "azurerm_subnet_network_security_group_association" "vm_subnet_assoc" {
+  subnet_id                 = azurerm_subnet.vm_subnet.id
+  network_security_group_id = azurerm_network_security_group.vm_nsg.id
+  
+  depends_on = [
+    azurerm_subnet.vm_subnet
+  ]
 }
 
 resource "azurerm_network_interface" "vm_client_nic" {
