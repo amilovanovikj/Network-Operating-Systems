@@ -37,4 +37,5 @@ terraform.rc
 old/
 *.txt
 *.pem
+*.rdp
 *.tfplan
