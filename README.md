@@ -28,4 +28,43 @@ To execute the scripts, clone this repository, cd into the directory and run ``t
 
 In order to have access to cloud resources, execute the Terraform commands from the same host that will RDP/SSH into the VMs. This is due to the way Terraform is set up to query http://ipv4.icanhazip.com for the public IP address of the host executing Terraform, and whitelisting this IP address on the RDP/SSH NSG rules.
 
+## DNS/Active Directory set up
+
+In order to set up Active Directory Domain Service, RDP into the windows VM named mos-vm-windows-dc (download the RDP file from the Azure portal and log into the VM with the credentials you specified in your .tfvars file). Then, open PowerShell and run the following commands:
+
+```PowerShell
+## AD DS Deployment
+Install-WindowsFeature AD-Domain-Services
+Import-Module ADDSDeployment
+Install-ADDSForest `
+  -CreateDnsDelegation:$false `
+  -DomainName "yourdomain.you" `
+  -DomainNetbiosName "YOURDOMAIN" `
+  -DomainMode "WinThreshold" `
+  -ForestMode "WinThreshold" `
+  -InstallDns:$true `
+  -NoRebootOnCompletion:$false `
+  -DatabasePath "C:\Windows\NTDS" `
+  -LogPath "C:\Windows\NTDS" `
+  -SysvolPath "C:\Windows\SYSVOL" `
+  -Force:$true
+
+# These commands will restart the VM. 
+# Again, RDP into it and open PowerShell to execute the commands that follow.
+
+## Create user in AD
+Import-Module ActiveDirectory
+New-ADUser `
+  -Name "Jane Doe" `
+  -GivenName "Jane" `
+  -Surname "Doe" `
+  -SamAccountName "jane.doe" `
+  -UserPrincipalName "jane.doe@yourdomain.you" `
+  -Path "OU=Users,DC=yourdomain,DC=you" `
+  -Enabled $true `
+  -AccountPassword(Read-Host -AsSecureString "Input Password:") 
+```
+
+After finishing with these PowerShell commands, you have a AD DS set up, with your user added in AD.
+
 ***
