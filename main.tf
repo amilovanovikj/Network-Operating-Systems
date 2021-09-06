@@ -103,7 +103,8 @@ resource "azurerm_network_interface" "vm_client_nic" {
     name                          = "mos-vm-ubuntu-client-ip-config"
     subnet_id                     = azurerm_subnet.vm_subnet.id
     public_ip_address_id          = azurerm_public_ip.vm_client_ip.id
-    private_ip_address_allocation = "Dynamic"
+    private_ip_address_allocation = "Static"
+    private_ip_address            = "172.16.32.36"
   }
 }
 
@@ -154,7 +155,8 @@ resource "azurerm_network_interface" "vm_mail_nic" {
     name                          = "mos-vm-ubuntu-mail-ip-config"
     subnet_id                     = azurerm_subnet.vm_subnet.id
     public_ip_address_id          = azurerm_public_ip.vm_mail_ip.id
-    private_ip_address_allocation = "Dynamic"
+    private_ip_address_allocation = "Static"
+    private_ip_address            = "172.16.32.37"
   }
 }
 
@@ -205,7 +207,8 @@ resource "azurerm_network_interface" "vm_dc_nic" {
     name                          = "mos-vm-windows-dc-ip-config"
     subnet_id                     = azurerm_subnet.dc_subnet.id
     public_ip_address_id          = azurerm_public_ip.vm_dc_ip.id
-    private_ip_address_allocation = "Dynamic"
+    private_ip_address_allocation = "Static"
+    private_ip_address            = "172.16.32.4"
   }
 }
 
