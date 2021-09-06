@@ -28,17 +28,17 @@ variable "ssh_key_mail" {
   sensitive   = true
   description = "The SSH key for connecting to the FTP/Mail Linux server"
 }
-variable linux_username {
+variable "linux_username" {
   type        = string
   sensitive   = true
   description = "The username for the Linux VMs"
 }
-variable windows_username {
+variable "windows_username" {
   type        = string
   sensitive   = true
   description = "The admin username for the Windows server"
 }
-variable windows_password {
+variable "windows_password" {
   type        = string
   sensitive   = true
   description = "The admin password for the Windows server"
