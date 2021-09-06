@@ -7,7 +7,7 @@ data "http" "myip" {
 }
 
 resource "azurerm_virtual_network" "vnet" {
-  name                = "mos-vnet-171033"
+  name                = "mos-vnet"
   location            = data.azurerm_resource_group.rg.location
   resource_group_name = data.azurerm_resource_group.rg.name
   address_space       = ["172.16.32.0/24"]
@@ -15,7 +15,7 @@ resource "azurerm_virtual_network" "vnet" {
 }
 
 resource "azurerm_network_security_group" "dc_nsg" {
-  name                = "mos-dc-nsg-171033"
+  name                = "mos-dc-nsg"
   location            = data.azurerm_resource_group.rg.location
   resource_group_name = data.azurerm_resource_group.rg.name
 
@@ -33,7 +33,7 @@ resource "azurerm_network_security_group" "dc_nsg" {
 }
 
 resource "azurerm_subnet" "dc_subnet" {
-  name                 = "mos-vnet-dc-subnet-171033"
+  name                 = "mos-vnet-dc-subnet"
   resource_group_name  = data.azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["172.16.32.0/27"]
@@ -53,7 +53,7 @@ resource "azurerm_subnet_network_security_group_association" "dc_subnet_assoc" {
 }
 
 resource "azurerm_network_security_group" "vm_nsg" {
-  name                = "mos-vm-nsg-171033"
+  name                = "mos-vm-nsg"
   location            = data.azurerm_resource_group.rg.location
   resource_group_name = data.azurerm_resource_group.rg.name
 
@@ -75,7 +75,7 @@ resource "azurerm_network_security_group" "vm_nsg" {
 }
 
 resource "azurerm_subnet" "vm_subnet" {
-  name                 = "mos-vnet-vm-subnet-171033"
+  name                 = "mos-vnet-vm-subnet"
   resource_group_name  = data.azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["172.16.32.32/27"]
@@ -95,12 +95,12 @@ resource "azurerm_subnet_network_security_group_association" "vm_subnet_assoc" {
 }
 
 resource "azurerm_network_interface" "vm_client_nic" {
-  name                = "mos-vm-ubuntu-client-171033-nic"
+  name                = "mos-vm-ubuntu-client-nic"
   location            = data.azurerm_resource_group.rg.location
   resource_group_name = data.azurerm_resource_group.rg.name
 
   ip_configuration {
-    name                          = "mos-vm-ubuntu-client-171033-ip-config"
+    name                          = "mos-vm-ubuntu-client-ip-config"
     subnet_id                     = azurerm_subnet.vm_subnet.id
     public_ip_address_id          = azurerm_public_ip.vm_client_ip.id
     private_ip_address_allocation = "Dynamic"
@@ -108,15 +108,15 @@ resource "azurerm_network_interface" "vm_client_nic" {
 }
 
 resource "azurerm_public_ip" "vm_client_ip" {
-  name                = "mos-vm-ubuntu-client-171033-ip"
+  name                = "mos-vm-ubuntu-client-ip"
   resource_group_name = data.azurerm_resource_group.rg.name
   location            = data.azurerm_resource_group.rg.location
   allocation_method   = "Dynamic"
 }
 
 resource "azurerm_linux_virtual_machine" "vm_client" {
-  name                = "mos-vm-ubuntu-client-171033"
-  computer_name       = "mos-clt-171033"
+  name                = "mos-vm-ubuntu-client"
+  computer_name       = "mos-client"
   resource_group_name = data.azurerm_resource_group.rg.name
   location            = data.azurerm_resource_group.rg.location
   admin_username      = var.linux_username
@@ -132,7 +132,7 @@ resource "azurerm_linux_virtual_machine" "vm_client" {
   }
 
   os_disk {
-    name                 = "mos-vm-ubuntu-client-171033-disk"
+    name                 = "mos-vm-ubuntu-client-disk"
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
@@ -146,12 +146,12 @@ resource "azurerm_linux_virtual_machine" "vm_client" {
 }
 
 resource "azurerm_network_interface" "vm_mail_nic" {
-  name                = "mos-vm-ubuntu-mail-171033-nic"
+  name                = "mos-vm-ubuntu-mail-nic"
   location            = data.azurerm_resource_group.rg.location
   resource_group_name = data.azurerm_resource_group.rg.name
 
   ip_configuration {
-    name                          = "mos-vm-ubuntu-mail-171033-ip-config"
+    name                          = "mos-vm-ubuntu-mail-ip-config"
     subnet_id                     = azurerm_subnet.vm_subnet.id
     public_ip_address_id          = azurerm_public_ip.vm_mail_ip.id
     private_ip_address_allocation = "Dynamic"
@@ -159,15 +159,15 @@ resource "azurerm_network_interface" "vm_mail_nic" {
 }
 
 resource "azurerm_public_ip" "vm_mail_ip" {
-  name                = "mos-vm-ubuntu-mail-171033-ip"
+  name                = "mos-vm-ubuntu-mail-ip"
   resource_group_name = data.azurerm_resource_group.rg.name
   location            = data.azurerm_resource_group.rg.location
   allocation_method   = "Dynamic"
 }
 
 resource "azurerm_linux_virtual_machine" "vm_mail" {
-  name                = "mos-vm-ubuntu-mail-171033"
-  computer_name       = "mos-mail-171033"
+  name                = "mos-vm-ubuntu-mail"
+  computer_name       = "mos-mail"
   resource_group_name = data.azurerm_resource_group.rg.name
   location            = data.azurerm_resource_group.rg.location
   admin_username      = var.linux_username
@@ -183,7 +183,7 @@ resource "azurerm_linux_virtual_machine" "vm_mail" {
   }
 
   os_disk {
-    name                 = "mos-vm-ubuntu-mail-171033-disk"
+    name                 = "mos-vm-ubuntu-mail-disk"
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
@@ -197,12 +197,12 @@ resource "azurerm_linux_virtual_machine" "vm_mail" {
 }
 
 resource "azurerm_network_interface" "vm_dc_nic" {
-  name                = "mos-vm-windows-dc-171033-nic"
+  name                = "mos-vm-windows-dc-nic"
   location            = data.azurerm_resource_group.rg.location
   resource_group_name = data.azurerm_resource_group.rg.name
 
   ip_configuration {
-    name                          = "mos-vm-windows-dc-171033-ip-config"
+    name                          = "mos-vm-windows-dc-ip-config"
     subnet_id                     = azurerm_subnet.dc_subnet.id
     public_ip_address_id          = azurerm_public_ip.vm_dc_ip.id
     private_ip_address_allocation = "Dynamic"
@@ -210,15 +210,15 @@ resource "azurerm_network_interface" "vm_dc_nic" {
 }
 
 resource "azurerm_public_ip" "vm_dc_ip" {
-  name                = "mos-vm-windows-dc-171033-ip"
+  name                = "mos-vm-windows-dc-ip"
   resource_group_name = data.azurerm_resource_group.rg.name
   location            = data.azurerm_resource_group.rg.location
   allocation_method   = "Dynamic"
 }
 
 resource "azurerm_windows_virtual_machine" "vm_dc" {
-  name                = "mos-vm-windows-dc-171033"
-  computer_name       = "mos-dc-171033"
+  name                = "mos-vm-windows-dc"
+  computer_name       = "mos-dc"
   resource_group_name = data.azurerm_resource_group.rg.name
   location            = data.azurerm_resource_group.rg.location
   size                = "Standard_B2s"
@@ -229,7 +229,7 @@ resource "azurerm_windows_virtual_machine" "vm_dc" {
   ]
 
   os_disk {
-    name                 = "mos-vm-windows-dc-171033-disk"
+    name                 = "mos-vm-windows-dc-disk"
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
