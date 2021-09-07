@@ -301,9 +301,6 @@ mailbox_size_limit = 0
 recipient_delimiter = +
 inet_interfaces = all
 inet_protocols = all' ) | sudo tee /etc/postfix/main.cf
-
-# Enable access to FTP and SMTP ports for the Azure VNet private IP range in the VM firewall.
-sudo ufw allow from 172.16.32.0 to 172.16.32.255 port 25,20,21,10000:10100 proto tcp
 ```
 
 ## Client setup
