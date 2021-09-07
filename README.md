@@ -26,7 +26,7 @@ The Terraform files found in this repository create the following resources in a
 ***
 
 Before starting with terraform commands, create a new resource group named **Network-Operating-Systems** in Azure and a service principal (SPN for short) and give it "Contributor" access on the resource group scope. 
-- Use the Azure portal to create an SPN -> search for 'Azure Active Directory' and click the service. Next, go to 'App registrations' in the 'Manage' menu and click on 'New registration'. Type in the SPN name and click 'Register', leaving everything else as default.
+- Use the [Azure portal](https://portal.azure.com) to create an SPN -> search for 'Azure Active Directory' and click the service. Next, go to 'App registrations' in the 'Manage' menu and click on 'New registration'. Type in the SPN name and click 'Register', leaving everything else as default.
 - To create a secret for the SPN, again go to the 'App registrations' and select the created SPN. Go to 'Certificates & secrets' in the 'Manage' menu and click on 'New client secret'. Enter a description (something like 'Terraform') and click 'Add'.
 - Next, create a resource group from the Azure portal -> search for 'Resource groups' and click the service. Click '+ Create' and specify the name as 'Network-Operating-Systems', and choose the region that is closest to you. Click 'Review + create'.
 - Go to the resource group and under the 'Access Control (IAM)' menu click on '+ Add' and 'Add role assignment'. Select the 'Contributor' role, assign access to 'User, group, or service principal' and search for your SPN by its name. Click 'Save'
@@ -329,7 +329,7 @@ alpine
 # E + Q + Y
 
 # Edit the Mail User's Alpine configuration
-sed '/personal-name=/s/$/Anonymous mail user/;
+sed '/personal-name=/s/$/Mail User/;
 /user-domain=/s/$/yourdomain\.you:25\/user=mailuser@yourdomain\.you/;
 /smtp-server=/s/$/mos-mail/;
 /literal-signature=/s/$/Kind regards,\\nAnonymous mail user\\n/' ~/.pinerc > temp
@@ -339,3 +339,57 @@ mv temp ~/.pinerc
 exit
 ```
 
+## Test the configuration
+
+As a final step, we will test the whole configuration.
+
+### FTP login, get and put
+
+In two different terminal windows, SSH into both the FTP server and the client. 
+
+On the FTP server create a file used for testing the FTP **get** command:
+```bash
+echo "FTP GET TEST" > ftp.get
+```
+
+On the client server create a file used for testing the FTP **put** command:
+```bash
+echo "FTP PUT TEST" > ftp.put
+```
+
+Now try to connect to the FTP server from the client, using the hostname of the FTP server. On the client VM run:
+```bash
+ftp mos-mail
+```
+You will be prompted for username and password. Use the credentials for the user you created in AD. If you get a 'Login successful' message it means that both the DNS and the Active Directory services work (The hostname 'mos-mail' was resolved on the DNS server and the Kerberos authentication with AD succeeded when typing in your credentials).
+
+If you succeeded so far, you will have the FTP command line open and ready for transfering files. Test the FTP **get** command by running ``get ftp.get`` and the FTP **put** command by running ``put ftp.put``. You should see a 'Transfer complete' message. Exit the FTP command line utility by running the command ``bye`` and list the user directory with ``ls``. You should see both files on the client. If you list the home directory of the same user on the FTP server, you should again see both files.
+
+#### Note: If the your Linux user (on both VMs) doesn't have the same name as the value for 'SamAccountName' of the AD user you created, you will need to create this user by running ``sudo useradd -m <SamAccountName>`` and switch to that user by running ``su - <SamAccountName>``.
+
+### Mail service
+
+Finally, let's test the mail service by sending an email from one AD user to another in the same domain, as well as reading this email on the Mail server.
+
+On the client VM, switch to the Mail User and open the Alpine mail client:
+```bash
+su - mailuser
+alpine
+```
+On the Alpine menu screen pres the 'C' key to send a new email. In the 'To:' section add the email address of your Linux user ``<linux_user>@yourdomain.you``. Using the arrow keys go to the 'Subject:' section and add a subject for the email, and then add text to the email body. Press 'Ctrl+X' to send and 'Y' to confirm. You will now see a screen saying that the SSL/TLS certificates of the server failed to validate. You can safely skip this message by pressing 'Y' once more, since we didn't implement SSL. You should now see the Alpine menu with a 'Message sent' notification. Press 'Q + Y' to exit the Alpine client.
+
+Switch to the terminal where you have connected to the mail server via SSH. Make sure you are on the Linux (AD) user you sent the email to and type in the command:
+```bash
+mail
+```
+You should now see that you have a new message from the Mail User with the subject you provided. Press '1' to open it and read its content.
+
+And Viola! You have successfully configured an FTP and mail server in an Active Directory domain, that authenticates users with Kerberos and a client machine that can use these services and resolve the servers using the a custom DNS server.
+
+## IMPORTANT: Destroy cloud resources
+
+After you are finished with testing and playing around with these services, it is important to clean up the cloud environment in order not to be charged by the cloud provider. Use the following command to achieve this:
+```bash
+terraform destroy --var-file="variables.tfvars"
+```
+And confirm the destruction by typing in "yes" when prompted.
