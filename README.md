@@ -9,8 +9,8 @@ It includes terraform scripts for automating the deployment process on the cloud
 The Terraform files found in this repository create the following resources in a resource group named **Network-Operating-Systems** on Azure cloud:
 - A VNet with address space 172.16.32.0/24
 - Two subnets on the VNet space:
-  - A subnet with address prefix of 172.16.32.0/27 in which the domain controller (DNS/AD server) will reside **-> DC subnet**
-  - A subnet with address prefix of 172.16.32.32/27 in which the ftp/mail server and the client server will reside **-> VM subnet**
+  - **DC subnet** with address prefix of 172.16.32.0/27 in which the domain controller (DNS/AD server) will reside
+  - **VM subnet** with address prefix of 172.16.32.32/27 in which the ftp/mail server and the client server will reside
 - Two network security groups (one for each subnet):
   - An NSG that allows inbound RDP traffic from the terraform host to the DC subnet
   - An NSG that allows inbound SSH traffic from the terraform host to the VM subnet
@@ -22,6 +22,8 @@ The Terraform files found in this repository create the following resources in a
   - NIC for the ftp/mail server, with private IP association in the VM subnet and one public IP address
   - NIC for the client server, with private IP association in the DC subnet and one public IP address
 - Three OS disks, one for each VM
+
+***
 
 Before starting with terraform commands, create a new resource group named **Network-Operating-Systems** in Azure and a service principal (SPN for short) and give it "Contributor" access on the resource group scope. 
 - Use the Azure portal to create an SPN -> search for 'Azure Active Directory' and click the service. Next, go to 'App registrations' in the 'Manage' menu and click on 'New registration'. Type in the SPN name and click 'Register', leaving everything else as default.
